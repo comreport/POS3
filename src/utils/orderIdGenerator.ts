@@ -1,5 +1,6 @@
 // Generate order ID in format POS-MMDDYYYY-XXX
 let orderCounter = 0; // Simple counter to handle parallel requests
+let lastResetDate = ''; // Track when counter was last reset
 
 export const generateOrderId = (): string => {
   const now = new Date();
@@ -9,6 +10,12 @@ export const generateOrderId = (): string => {
   
   // Get today's date string for comparison
   const todayDateString = `${month}${day}${year}`;
+  
+  // Reset counter if it's a new day
+  if (lastResetDate !== todayDateString) {
+    orderCounter = 0;
+    lastResetDate = todayDateString;
+  }
   
   // Get existing orders from localStorage to determine next sequence number
   const existingOrders = JSON.parse(localStorage.getItem('restaurant_pos_order_history') || '[]');
@@ -34,13 +41,13 @@ export const generateOrderId = (): string => {
     }
   });
   
-  // Increment counter for parallel requests and use the higher value
-  orderCounter++;
-  const nextSequence = Math.max(maxSequence + 1, orderCounter);
-  const sequenceStr = String(nextSequence).padStart(3, '0');
+  // Use the next available sequence number
+  const nextSequence = Math.max(maxSequence + 1, orderCounter + 1);
   
-  // Update counter to prevent future conflicts
+  // Update counter to this sequence number to prevent conflicts
   orderCounter = nextSequence;
+  
+  const sequenceStr = String(nextSequence).padStart(3, '0');
   
   // Format: POS-MMDDYYYY-XXX (e.g., POS-07132024-001 for July 13, 2024, first order)
   return `POS-${month}${day}${year}-${sequenceStr}`;
