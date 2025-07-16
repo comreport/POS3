@@ -1,6 +1,7 @@
-// Generate order ID in format POS-MMDDYYYY-XXX
-let orderCounter = 0; // Simple counter to handle parallel requests
-let lastResetDate = ''; // Track when counter was last reset
+// Generate order ID in format POS-MMDDYYYY-XXX with proper parallel handling
+let orderCounter = 0;
+let lastResetDate = '';
+let pendingOrders = new Set(); // Track pending order IDs to prevent duplicates
 
 export const generateOrderId = (): string => {
   const now = new Date();
@@ -15,13 +16,23 @@ export const generateOrderId = (): string => {
   if (lastResetDate !== todayDateString) {
     orderCounter = 0;
     lastResetDate = todayDateString;
+    pendingOrders.clear(); // Clear pending orders for new day
   }
   
   // Get existing orders from localStorage to determine next sequence number
   const existingOrders = JSON.parse(localStorage.getItem('restaurant_pos_order_history') || '[]');
   
+  // Also check tables for any active orders with today's date
+  const existingTables = JSON.parse(localStorage.getItem('restaurant_pos_tables') || '[]');
+  const activeTableOrders = existingTables
+    .filter((table: any) => table.orderId && table.orderId.startsWith('POS-'))
+    .map((table: any) => ({ id: table.orderId }));
+  
+  // Combine all existing orders
+  const allExistingOrders = [...existingOrders, ...activeTableOrders];
+  
   // Filter orders from today and extract sequence numbers
-  const todayOrders = existingOrders.filter((order: any) => {
+  const todayOrders = allExistingOrders.filter((order: any) => {
     if (order.id && order.id.startsWith('POS-')) {
       const orderDatePart = order.id.split('-')[1]; // Extract MMDDYYYY part
       return orderDatePart === todayDateString;
@@ -41,16 +52,35 @@ export const generateOrderId = (): string => {
     }
   });
   
-  // Use the next available sequence number
-  const nextSequence = Math.max(maxSequence + 1, orderCounter + 1);
+  // Also check pending orders to avoid conflicts
+  let nextSequence = Math.max(maxSequence + 1, orderCounter + 1);
+  
+  // Ensure we don't generate a duplicate ID that's currently pending
+  let candidateId;
+  do {
+    const sequenceStr = String(nextSequence).padStart(3, '0');
+    candidateId = `POS-${month}${day}${year}-${sequenceStr}`;
+    
+    // Check if this ID is already pending or exists
+    if (!pendingOrders.has(candidateId) && !todayOrders.some((order: any) => order.id === candidateId)) {
+      break;
+    }
+    nextSequence++;
+  } while (true);
+  
+  // Mark this ID as pending to prevent duplicates
+  pendingOrders.add(candidateId);
   
   // Update counter to this sequence number to prevent conflicts
   orderCounter = nextSequence;
   
-  const sequenceStr = String(nextSequence).padStart(3, '0');
+  // Clean up pending orders after a delay (in case order creation fails)
+  setTimeout(() => {
+    pendingOrders.delete(candidateId);
+  }, 10000); // Remove from pending after 10 seconds
   
-  // Format: POS-MMDDYYYY-XXX (e.g., POS-07132024-001 for July 13, 2024, first order)
-  return `POS-${month}${day}${year}-${sequenceStr}`;
+  console.log('Generated order ID:', candidateId, 'Sequence:', nextSequence);
+  return candidateId;
 };
 
 // Generate table-specific order ID for consistency
@@ -99,4 +129,16 @@ export const getOrderDateFromId = (orderId: string): string => {
     }
   }
   return '';
+};
+
+// Function to mark an order ID as used (call this when order is actually created)
+export const markOrderIdAsUsed = (orderId: string): void => {
+  pendingOrders.delete(orderId);
+  console.log('Marked order ID as used:', orderId);
+};
+
+// Function to release a pending order ID (call this if order creation fails)
+export const releasePendingOrderId = (orderId: string): void => {
+  pendingOrders.delete(orderId);
+  console.log('Released pending order ID:', orderId);
 };

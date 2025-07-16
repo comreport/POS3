@@ -3,6 +3,7 @@ import { database, DatabaseSettings } from '../database/localStorage';
 import { Table, MenuItem } from '../types';
 import { realSyncService } from '../services/realSyncService';
 import { generateOrderId } from '../utils/orderIdGenerator';
+import { generateOrderId, markOrderIdAsUsed } from '../utils/orderIdGenerator';
 
 export const useDatabase = () => {
   const [settings, setSettings] = useState<DatabaseSettings | null>(null);
@@ -459,6 +460,11 @@ export const useDatabase = () => {
   const addOrderHistory = (order: any) => {
     try {
       console.log('📋 Adding order to history:', order.id);
+      
+      // Mark the order ID as used when adding to history
+      if (order.id && order.id.startsWith('POS-')) {
+        markOrderIdAsUsed(order.id);
+      }
       
       // Prepare order data for database storage
       const orderForDb = {

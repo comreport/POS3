@@ -4,6 +4,7 @@ import { Plus, Edit, Trash2, X, Save, Users, ShoppingCart } from 'lucide-react';
 import { Table, OrderItem } from '../types';
 import { DatabaseSettings } from '../database/localStorage';
 import { generateOrderId, generateTableOrderId } from '../utils/orderIdGenerator';
+import { generateOrderId, generateTableOrderId, markOrderIdAsUsed } from '../utils/orderIdGenerator';
 import TableCard from './TableCard';
 import OrderingSystem from './OrderingSystem';
 import ViewOrderModal from './ViewOrderModal';
@@ -47,13 +48,22 @@ const TableManagement: React.FC<TableManagementProps> = ({
   const handleStartOrder = (tableId: string) => {
     const table = tables.find(t => t.id === tableId);
     if (table) {
+      // Generate order ID immediately when starting order
+      const orderId = generateOrderId();
+      console.log('Starting order for table:', table.number, 'with Order ID:', orderId);
+      
       // Set table as occupied when starting an order, preserve existing order items
       const updatedTable = { 
         ...table, 
         status: 'occupied' as const,
-        orderItems: table.orderItems || []
+        orderItems: table.orderItems || [],
+        orderId: orderId
       };
       onUpdateTable(updatedTable);
+      
+      // Mark the order ID as used
+      markOrderIdAsUsed(orderId);
+      
       setOrderingTable(updatedTable);
     }
   };
@@ -178,13 +188,18 @@ const TableManagement: React.FC<TableManagementProps> = ({
     if (table) {
       const customer = prompt('Enter customer name:');
       if (customer) {
-        const orderId = generateOrderId(); // Generate POS-MMDDYYYY-XXX format
+        const orderId = generateOrderId();
+        console.log('Occupying table:', table.number, 'with Order ID:', orderId);
+        
         onUpdateTable({ 
           ...table, 
           status: 'occupied', 
           customer,
           orderId: orderId
         });
+        
+        // Mark the order ID as used
+        markOrderIdAsUsed(orderId);
       }
     }
   };

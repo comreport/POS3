@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Minus, ShoppingCart, X, Check, ArrowLeft, Save } from 'lucide-react';
 import { Table, MenuItem, OrderItem } from '../types';
 import { generateOrderId, generateTableOrderId } from '../utils/orderIdGenerator';
+import { generateOrderId, generateTableOrderId, markOrderIdAsUsed } from '../utils/orderIdGenerator';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getTableName, getSeatCount } from '../utils/translations';
 
@@ -108,7 +109,14 @@ const OrderingSystem: React.FC<OrderingSystemProps> = ({
     }
 
     const total = getTotalAmount();
-    const orderId = table.orderId || generateOrderId(); // Generate POS-MMDDYYYY-XXX format
+    // Use existing order ID or generate new one if not present
+    let orderId = table.orderId;
+    if (!orderId || !orderId.startsWith('POS-')) {
+      orderId = generateOrderId();
+      console.log('Generated new order ID for save:', orderId);
+      markOrderIdAsUsed(orderId);
+    }
+    
     onSaveOrder(table.id, orderItems, total);
   };
 
