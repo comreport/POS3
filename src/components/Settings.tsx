@@ -143,7 +143,7 @@ const Settings: React.FC<SettingsProps> = ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `MiniPOS-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `${localSettings.restaurantName || 'MiniPOS'}-backup-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

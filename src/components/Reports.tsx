@@ -286,9 +286,10 @@ const Reports: React.FC<ReportsProps> = ({ tables = [], orderHistory = [], onCle
 
       // Generate filename with current date
       const currentDate = new Date().toISOString().split('T')[0];
+      const posName = settings?.restaurantName || 'MiniPOS';
       const filename = selectedDate 
-        ? `MiniPOS-order-history-${selectedDate}.xlsx`
-        : `MiniPOS-order-history-${currentDate}.xlsx`;
+        ? `${posName}-order-history-${selectedDate}.xlsx`
+        : `${posName}-order-history-${currentDate}.xlsx`;
 
       // Save file
       XLSX.writeFile(wb, filename);
