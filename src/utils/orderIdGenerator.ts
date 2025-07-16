@@ -1,4 +1,6 @@
 // Generate order ID in format POS-MMDDYYYY-XXX
+let orderCounter = 0; // Simple counter to handle parallel requests
+
 export const generateOrderId = (): string => {
   const now = new Date();
   const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -32,9 +34,13 @@ export const generateOrderId = (): string => {
     }
   });
   
-  // Next sequence number
-  const nextSequence = maxSequence + 1;
+  // Increment counter for parallel requests and use the higher value
+  orderCounter++;
+  const nextSequence = Math.max(maxSequence + 1, orderCounter);
   const sequenceStr = String(nextSequence).padStart(3, '0');
+  
+  // Update counter to prevent future conflicts
+  orderCounter = nextSequence;
   
   // Format: POS-MMDDYYYY-XXX (e.g., POS-07132024-001 for July 13, 2024, first order)
   return `POS-${month}${day}${year}-${sequenceStr}`;
