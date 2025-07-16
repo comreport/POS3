@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Minus, ShoppingCart, X, Check, ArrowLeft, Save } from 'lucide-react';
 import { Table, MenuItem, OrderItem } from '../types';
-import { generateOrderId, generateTableOrderId } from '../utils/orderIdGenerator';
 import { generateOrderId, generateTableOrderId, markOrderIdAsUsed } from '../utils/orderIdGenerator';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getTableName, getSeatCount } from '../utils/translations';
