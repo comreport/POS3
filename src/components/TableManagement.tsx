@@ -3,7 +3,6 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { Plus, Edit, Trash2, X, Save, Users, ShoppingCart } from 'lucide-react';
 import { Table, OrderItem } from '../types';
 import { DatabaseSettings } from '../database/localStorage';
-import { generateOrderId, generateTableOrderId } from '../utils/orderIdGenerator';
 import { generateOrderId, generateTableOrderId, markOrderIdAsUsed } from '../utils/orderIdGenerator';
 import TableCard from './TableCard';
 import OrderingSystem from './OrderingSystem';
