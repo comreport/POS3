@@ -287,8 +287,8 @@ const Reports: React.FC<ReportsProps> = ({ tables = [], orderHistory = [], onCle
       // Generate filename with current date
       const currentDate = new Date().toISOString().split('T')[0];
       const filename = selectedDate 
-        ? `detailed-order-history-${selectedDate}.xlsx`
-        : `detailed-order-history-${currentDate}.xlsx`;
+        ? `MiniPOS-order-history-${selectedDate}.xlsx`
+        : `MiniPOS-order-history-${currentDate}.xlsx`;
 
       // Save file
       XLSX.writeFile(wb, filename);
