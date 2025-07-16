@@ -7,9 +7,10 @@ interface LoginProps {
   onLogin: (username: string, role: string) => void;
   users: Array<{ id: string; name: string; email: string; roleId: string; password: string; isActive: boolean }>;
   roles: Array<{ id: string; name: string; permissions: string[] }>;
+  settings: any;
 }
 
-const Login: React.FC<LoginProps> = ({ onLogin, users, roles }) => {
+const Login: React.FC<LoginProps> = ({ onLogin, users, roles, settings }) => {
   const { t } = useLanguage();
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -213,11 +214,23 @@ const Login: React.FC<LoginProps> = ({ onLogin, users, roles }) => {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md mx-auto overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 sm:p-8 text-center">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-            <LogIn className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 overflow-hidden">
+            {settings?.logo ? (
+              <img 
+                src={settings.logo} 
+                alt="Logo" 
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <LogIn className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
+            )}
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('restaurantPOS')}</h1>
-          <p className="text-blue-100 text-xs sm:text-sm">{t('professionalPOS')}</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">
+            {settings?.restaurantName || t('restaurantPOS')}
+          </h1>
+          <p className="text-blue-100 text-xs sm:text-sm">
+            {settings?.description || t('professionalPOS')}
+          </p>
         </div>
 
         {/* Login Form */}

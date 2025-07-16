@@ -727,7 +727,7 @@ function App() {
 
   // Show login page if not logged in
   if (!isLoggedIn) {
-    return <Login onLogin={handleLogin} users={users} roles={roles} />;
+    return <Login onLogin={handleLogin} users={users} roles={roles} settings={settings} />;
   }
 
   const renderContent = () => {
